@@ -40,6 +40,9 @@ let plusButton = ref();
 let minusButton = ref();
 
 let valueRef = ref(props.value);
+watch(() => props.value, () => {
+  valueRef.value = props.value;
+});
 
 const maxValue = 100;
 const minValue = 0;
