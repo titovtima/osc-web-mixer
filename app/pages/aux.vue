@@ -14,6 +14,7 @@
             :value="aux.number" 
             :key="aux.number"
             :style="{ color: '#' + aux.color }"
+            :selected="currentAuxNum == aux.number"
           >
             {{ aux.name }}
           </option>
@@ -63,9 +64,11 @@ for (let i = 0; i <= maxAux; i++) {
   pans.value[i] = new Array<number>(maxChannel+1).fill(0);
 }
 
+const localStorageCurrentAuxKey = 'currentAux';
 function changeAux(num: number) {
   console.log('changeAux for ' + num);
   currentAuxNum.value = num;
+  localStorage.setItem(localStorageCurrentAuxKey, String(num));
 }
 
 fetch(httpHost + "/channels").then(res => res.json()).then(res => {
@@ -75,7 +78,6 @@ fetch(httpHost + "/channels").then(res => res.json()).then(res => {
 
 fetch(httpHost + "/auxes").then(res => res.json()).then(res => {
   auxes.value = res.auxes;
-  currentAuxNum.value = 1;
 });
 
 let ws: WebSocket;
@@ -125,6 +127,15 @@ function sendPanToServer(channel: number, aux: number, value: number) {
     ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/pan', args: [value]}))
   }
 }
+
+onMounted(() => {
+  try {
+    currentAuxNum.value = Number(localStorage.getItem(localStorageCurrentAuxKey));
+  } catch(_) {
+  }
+  if (currentAuxNum.value == 0)
+    currentAuxNum.value = 1;
+})
 </script>
 
 <style scoped>
