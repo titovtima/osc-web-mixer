@@ -17,12 +17,12 @@ const currentAuxNum = ref(0);
 const channels: Ref<Array<any>> = ref([]);
 const auxes: Ref<Array<any>> = ref([{number: 0, name: "aux 0", color: "ffffff"}]);
 
-const maxAux = 4;
-const maxChannel = 4;
+const maxAux = 32;
+const maxChannel = 64;
 
-const values: Ref<any> = ref(new Array(maxAux));
-for (let i = 0; i < maxAux; i++) {
-  values.value[i] = new Array<number>(maxChannel).fill(0);
+const values: Ref<any> = ref(new Array(maxAux+1));
+for (let i = 0; i <= maxAux; i++) {
+  values.value[i] = new Array<number>(maxChannel+1).fill(0);
 }
 
 function changeAux(num: number) {
