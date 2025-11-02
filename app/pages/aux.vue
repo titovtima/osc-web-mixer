@@ -88,12 +88,14 @@ function createWs() {
   ws.onmessage = (event) => {
     let data = JSON.parse(event.data);
     let addrLevels: string[] = data.address.split('/');
-    if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'level') {
+    // if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'level') {
+    if (addrLevels.length == 7 && addrLevels[2] == 'Input_Channels' && addrLevels[4] == 'Aux_Send' && addrLevels[6] == 'send_level') {
       let channelNum = Number(addrLevels[2]);
       let auxNum = Number(addrLevels[4]);
       levels.value[auxNum][channelNum] = data.args[0];
     }
-    if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'pan') {
+    // if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'pan') {
+    if (addrLevels.length == 7 && addrLevels[2] == 'Input_Channels' && addrLevels[4] == 'Aux_Send' && addrLevels[6] == 'send_pan') {
       let channelNum = Number(addrLevels[2]);
       let auxNum = Number(addrLevels[4]);
       pans.value[auxNum][channelNum] = data.args[0];
@@ -118,13 +120,15 @@ function createWs() {
 
 function sendLevelToServer(channel: number, aux: number, value: number) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/level', args: [value]}))
+    // ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/level', args: [value]}))
+    ws.send(JSON.stringify({address: '/sd/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_level', args: [value]}))
   }
 }
 
 function sendPanToServer(channel: number, aux: number, value: number) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/pan', args: [value]}))
+    // ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/pan', args: [value]}))
+    ws.send(JSON.stringify({address: '/sd/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_pan', args: [value]}))
   }
 }
 
