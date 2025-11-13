@@ -10,8 +10,10 @@
 <script setup lang="ts">
 const channels: Ref<any[]> = ref([]);
 
-fetch(httpHost + '/auxes').then(res => res.json()).then(res => {
-  channels.value = res.auxes;
+loadConfigPromise.then(() => {
+  fetch('http://' + config.host + '/channels').then(res => res.json()).then(res => {
+    channels.value = res.channels;
+  });
 });
 
 function addChannel() {
@@ -19,7 +21,7 @@ function addChannel() {
   for (let channel of channels.value) {
     maxNum = Math.max(maxNum, channel.number);
   }
-  channels.value.push({number: maxNum+1, name: 'aux ' + (maxNum+1), color: 'ffffff'})
+  channels.value.push({number: maxNum+1, name: 'channel ' + (maxNum+1), color: 'ffffff'})
 }
 
 function save() {
@@ -28,12 +30,12 @@ function save() {
     return;
   }
   channels.value.sort((a, b) => a.number - b.number);
-  fetch(httpHost + '/auxes', {
+  fetch('http://' + config.host + '/channels', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({auxes: channels.value})
+    body: JSON.stringify({channels: channels.value})
   }).then(res => {
     if (res.ok)
       alert('saved successfully')

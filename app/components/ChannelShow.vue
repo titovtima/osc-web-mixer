@@ -129,38 +129,9 @@ watch(() => props.level, () => {
   levelRef.value = props.level;
 });
 
-const maxValue = 100;
-const minValue = 0;
-const step = 0.5;
-const minDbValue = -150;
-const maxDbValue = 10;
-const logBase = 100;
-const roundWith = 10;
-
 // Drag state management
 let isLevelDragging = false;
 let isPanDragging = false;
-
-function sliderToDb(value: number): number {
-  return ((Math.log(value*(logBase - 1)/(maxValue - minValue) + (1 - minValue)) / Math.log(logBase)) * (maxDbValue - minDbValue)) + minDbValue;
-}
-
-function dbToSlider(db: number): number {
-  return (Math.pow(logBase, (db - minDbValue) / (maxDbValue - minDbValue)) - (1 - minValue)) * (maxValue - minValue)/(logBase - 1);
-}
-
-const maxPanValue = 1;
-const minPanValue = -1;
-const panRound = 100;
-const panStep = 0.01;
-
-function sliderToPan(value: number): number {
-  return value / 50 - 1;
-}
-
-function panToSlider(pan: number): number {
-  return (pan + 1) * 50;
-}
 
 function formatPanValue(pan: number): string {
   // Use larger epsilon (0.5%) to show C for values very close to center
@@ -170,20 +141,24 @@ function formatPanValue(pan: number): string {
 }
 
 function formatLevelValue(level: number): string {
-  // Round to 0.1 dB instead of 1 dB
+  if (level == -150) return '-inf';
   const rounded = Math.round(level * 10) / 10;
   return rounded >= 0 ? `+${rounded.toFixed(1)}` : rounded.toFixed(1);
 }
 
 // Simple click handlers for buttons (no hold functionality)
 function increaseLevel() {
-  const newValue = Math.min(maxDbValue, levelRef.value + step);
+  let newValue = Math.min(maxDbValue, levelRef.value + step);
+  if (levelRef.value == -150)
+    newValue = minDbValue + step;
   levelRef.value = newValue;
   emit('update:level', newValue);
 }
 
 function decreaseLevel() {
-  const newValue = Math.max(minDbValue, levelRef.value - step);
+  let newValue = levelRef.value - step;
+  if (newValue <= minDbValue)
+    newValue = -150;
   levelRef.value = newValue;
   emit('update:level', newValue);
 }
@@ -212,8 +187,15 @@ function handleLevelClick(event: MouseEvent) {
   const rect = bar.value.getBoundingClientRect();
   const newValue = ((event.clientX - rect.left) / rect.width) * maxValue;
   const clampedValue = Math.max(minValue, Math.min(maxValue, newValue));
+  console.log('clampedValue', clampedValue);
   levelRef.value = sliderToDb(clampedValue);
+  console.log('levelRef', levelRef.value);
+  // if (config.consoleType == 's')
+  //   levelRef.value = sliderToDb(clampedValue);
+  // else
+  //   levelRef.value = clampedValue / maxValue;
   emit('update:level', levelRef.value);
+  // emit('update:level', clampedValue / 100.0);
 }
 
 function handlePanClick(event: MouseEvent) {
@@ -223,7 +205,12 @@ function handlePanClick(event: MouseEvent) {
   const newValue = ((event.clientX - rect.left) / rect.width) * 100;
   const clampedValue = Math.max(minValue, Math.min(maxValue, newValue));
   panRef.value = sliderToPan(clampedValue);
+  // if (config.consoleType == 's')
+  //   panRef.value = sliderToPan(clampedValue);
+  // else
+  //   panRef.value = clampedValue / maxValue;
   emit('update:pan', panRef.value);
+  // emit('update:pan', clampedValue / 100.0);
 }
 
 // Optimized drag handlers for smooth movement

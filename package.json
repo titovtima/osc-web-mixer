@@ -10,10 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "fs": "^0.0.1-security",
     "nuxt": "^4.1.0",
     "vue": "^3.5.20",
     "vue-router": "^4.5.1",
-    "osc": "github:castles/osc.js",
     "ws": "8.12.0"
   }
 }

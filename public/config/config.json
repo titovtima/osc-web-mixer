@@ -1,0 +1,6 @@
+{
+    "host": "127.0.0.1:8002",
+    "maxChannel": 64,
+    "maxAux": 32,
+    "consoleType": "sd"
+}

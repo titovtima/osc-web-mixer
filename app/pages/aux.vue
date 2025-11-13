@@ -54,14 +54,12 @@ const wsConnected = ref(false);
 const channels: Ref<Array<any>> = ref([]);
 const auxes: Ref<Array<any>> = ref([{number: 0, name: "aux 0", color: "ffffff"}]);
 
-const maxAux = 32;
-const maxChannel = 64;
-
-const levels: Ref<any> = ref(new Array(maxAux+1));
-const pans: Ref<any> = ref(new Array(maxAux+1));
-for (let i = 0; i <= maxAux; i++) {
-  levels.value[i] = new Array<number>(maxChannel+1).fill(0);
-  pans.value[i] = new Array<number>(maxChannel+1).fill(0);
+// console.log(config);
+const levels: Ref<any> = ref(new Array(config.maxAux+1));
+const pans: Ref<any> = ref(new Array(config.maxAux+1));
+for (let i = 0; i <= config.maxAux; i++) {
+  levels.value[i] = new Array<number>(config.maxChannel+1).fill(0);
+  pans.value[i] = new Array<number>(config.maxChannel+1).fill(0);
 }
 
 const localStorageCurrentAuxKey = 'currentAux';
@@ -71,34 +69,47 @@ function changeAux(num: number) {
   localStorage.setItem(localStorageCurrentAuxKey, String(num));
 }
 
-fetch(httpHost + "/channels").then(res => res.json()).then(res => {
-  channels.value = res.channels;
-  createWs();
-});
+loadConfigPromise.then(() => {
+  fetch('http://' + config.host + "/channels").then(res => res.json()).then(res => {
+    channels.value = res.channels;
+    createWs();
+  });
 
-fetch(httpHost + "/auxes").then(res => res.json()).then(res => {
-  auxes.value = res.auxes;
+  fetch('http://' + config.host + "/auxes").then(res => res.json()).then(res => {
+    auxes.value = res.auxes;
+  });
 });
 
 let ws: WebSocket;
 
 function createWs() {
-  ws = new WebSocket("ws://" + host);
+  ws = new WebSocket("ws://" + config.host);
 
   ws.onmessage = (event) => {
     let data = JSON.parse(event.data);
     let addrLevels: string[] = data.address.split('/');
-    // if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'level') {
-    if (addrLevels.length == 7 && addrLevels[2] == 'Input_Channels' && addrLevels[4] == 'Aux_Send' && addrLevels[6] == 'send_level') {
-      let channelNum = Number(addrLevels[2]);
-      let auxNum = Number(addrLevels[4]);
-      levels.value[auxNum][channelNum] = data.args[0];
-    }
-    // if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'pan') {
-    if (addrLevels.length == 7 && addrLevels[2] == 'Input_Channels' && addrLevels[4] == 'Aux_Send' && addrLevels[6] == 'send_pan') {
-      let channelNum = Number(addrLevels[2]);
-      let auxNum = Number(addrLevels[4]);
-      pans.value[auxNum][channelNum] = data.args[0];
+    if (config.consoleType == 's') {
+      if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'level') {
+        let channelNum = Number(addrLevels[2]);
+        let auxNum = Number(addrLevels[4]);
+        levels.value[auxNum][channelNum] = data.args[0];
+      }
+      if (addrLevels.length == 6 && addrLevels[1] == 'channel' && addrLevels[3] == 'send' && addrLevels[5] == 'pan') { 
+        let channelNum = Number(addrLevels[2]);
+        let auxNum = Number(addrLevels[4]);
+        pans.value[auxNum][channelNum] = data.args[0];
+      }
+    } else {
+      if (addrLevels.length == 7 && addrLevels[2] == 'Input_Channels' && addrLevels[4] == 'Aux_Send' && addrLevels[6] == 'send_level') {
+        let channelNum = Number(addrLevels[3]);
+        let auxNum = Number(addrLevels[5]);
+        levels.value[auxNum][channelNum] = sliderToDb(data.args[0] * 100);
+      }
+      if (addrLevels.length == 7 && addrLevels[2] == 'Input_Channels' && addrLevels[4] == 'Aux_Send' && addrLevels[6] == 'send_pan') {
+        let channelNum = Number(addrLevels[3]);
+        let auxNum = Number(addrLevels[5]);
+        pans.value[auxNum][channelNum] = sliderToPan(data.args[0] * 100);
+      }
     }
   };
 
@@ -120,15 +131,27 @@ function createWs() {
 
 function sendLevelToServer(channel: number, aux: number, value: number) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    // ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/level', args: [value]}))
-    ws.send(JSON.stringify({address: '/sd/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_level', args: [value]}))
+    if (config.consoleType == 's') {
+      ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/level', args: [value]}))
+    } else {
+      ws.send(JSON.stringify({address: '/sd/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_level', 
+      // ws.send(JSON.stringify({address: '/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_level', 
+        args: [dbToSlider(value) / 100.0]}))
+    }
+    levels.value[aux][channel] = value;
   }
 }
 
 function sendPanToServer(channel: number, aux: number, value: number) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    // ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/pan', args: [value]}))
-    ws.send(JSON.stringify({address: '/sd/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_pan', args: [value]}))
+    if (config.consoleType == 's') {
+      ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/pan', args: [value]}))
+    } else {
+      ws.send(JSON.stringify({address: '/sd/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_pan',
+      // ws.send(JSON.stringify({address: '/Input_Channels/' + channel + '/Aux_Send/' + aux + '/send_pan',
+        args: [panToSlider(value) / 100.0]}))
+    }
+    pans.value[aux][channel] = value;
   }
 }
 
