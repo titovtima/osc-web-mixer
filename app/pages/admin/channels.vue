@@ -1,41 +1,43 @@
 <template>
   <div>
-    <ChannelSetup v-for="(_, index) in channels" v-model:channel="channels[index]" 
-      @delete="() => { channels = channels.filter((_, delInd) => delInd != index) }"/>
-    <button @click="addChannel">+</button>
+    <ChannelGroupSetup v-for="(_, index) in channelGroups" v-model="channelGroups[index]" 
+      @delete="() => { channelGroups = channelGroups.filter((_, delInd) => delInd != index) }"/>
+    <button @click="addGroup">+</button>
     <button @click="save">Save</button>
   </div>
 </template>
 
 <script setup lang="ts">
-const channels: Ref<any[]> = ref([]);
+import ChannelGroupSetup from '~/components/ChannelGroupSetup.vue';
+
+const channelGroups: Ref<channelGroup[]> = ref([]);
 
 loadConfigPromise.then(() => {
   fetch('http://' + config.host + '/channels').then(res => res.json()).then(res => {
-    channels.value = res.channels;
+    channelGroups.value = res.channels;
   });
 });
 
-function addChannel() {
-  let maxNum = 0;
-  for (let channel of channels.value) {
-    maxNum = Math.max(maxNum, channel.number);
+function addGroup() {
+  let maxOrd = 0;
+  for (let group of channelGroups.value) {
+    maxOrd = Math.max(maxOrd, group.order);
   }
-  channels.value.push({number: maxNum+1, name: 'channel ' + (maxNum+1), color: 'ffffff'})
+  channelGroups.value.push({order: maxOrd+1, name: 'group ' + (maxOrd+1), hidden: false, channels: []})
 }
 
 function save() {
   if (!check()) {
-    alert('incorrect configuration: 2 channels have the same numbers');
+    // alert('incorrect configuration: 2 channels have the same numbers');
     return;
   }
-  channels.value.sort((a, b) => a.number - b.number);
+  channelGroups.value.sort((a, b) => a.order - b.order);
   fetch('http://' + config.host + '/channels', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({channels: channels.value})
+    body: JSON.stringify({channels: channelGroups.value})
   }).then(res => {
     if (res.ok)
       alert('saved successfully')
@@ -45,10 +47,22 @@ function save() {
 }
 
 function check(): boolean {
-  for (let i1 = 0; i1 < channels.value.length; i1++) {
-    for (let i2 = 0; i2 < channels.value.length; i2++) {
-      if (i1 != i2 && channels.value[i1].number == channels.value[i2].number) {
+  for (let group1 of channelGroups.value) {
+    for (let group2 of channelGroups.value) {
+      if (group1 != group2 && group1.order == group2.order) {
+        alert('groups ' + group1.name + ' and ' + group2.name + ' have the same order');
         return false
+      }
+      for (let channel1 of group1.channels) {
+        for (let channel2 of group2.channels) {
+          if (channel1 != channel2 && channel1.number == channel2.number) {
+            alert('channels ' + channel1.name + ' and ' + channel2.name + ' have the same number');
+            return false
+          } else if (channel1 != channel2 && group1 == group2 && channel1.order == channel2.order) {
+            alert('channels ' + channel1.name + ' and ' + channel2.name + ' have the same order in one group');
+            return false
+          }
+        }
       }
     }
   }
