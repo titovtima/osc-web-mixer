@@ -27,9 +27,9 @@
         v-for="group in channels" 
         :group="group"
         :levels="levels[currentAuxNum]" 
-        @update:level="(value, channelNum) => sendLevelToServer(channelNum, value)"
+        @update:level="(value: number, channelNum: number) => sendLevelToServer(channelNum, value)"
         :pans="pans[currentAuxNum]" 
-        @update:pan="(value, channelNum) => sendPanToServer(channelNum, value)"
+        @update:pan="(value: number, channelNum: number) => sendPanToServer(channelNum, value)"
       />
       <!-- <ChannelShow 
         v-for="channel in channels" 
@@ -44,7 +44,7 @@
         {{ wsConnected ? 'Connected' : 'Disconnected' }}
       </div>
       <div class="current-aux-display">
-        {{ auxes.find(a => a.number === currentAuxNum)?.name || 'None' }}
+        {{ auxes.find((a: any) => a.number === currentAuxNum)?.name || 'None' }}
       </div>
     </div>
   </div>
@@ -57,17 +57,11 @@ const selectAuxElem: Ref<any> = ref(null);
 const currentAuxNum = ref(0);
 const wsConnected = ref(false);
 
-const channels: Ref<channelGroup[]> = ref([]);
+const channels: Ref<channelGroup[]> = ref([{name: "group 0", order: 1, hidden: true, channels: []}]);
 const auxes: Ref<Array<any>> = ref([{number: 0, name: "aux 0", color: "ffffff"}]);
 
-// console.log(config);
-const levels: Ref<any> = ref(new Array(config.maxAux+1));
-const pans: Ref<any> = ref(new Array(config.maxAux+1));
-for (let i = 0; i <= config.maxAux; i++) {
-  levels.value[i] = new Array<number>(config.maxChannel+1).fill(0);
-  pans.value[i] = new Array<number>(config.maxChannel+1).fill(0);
-}
-
+const levels: Ref<any> = ref([]);
+const pans: Ref<any> = ref([]);
 const localStorageCurrentAuxKey = 'currentAux';
 function changeAux(num: number) {
   console.log('changeAux for ' + num);
@@ -75,16 +69,30 @@ function changeAux(num: number) {
   localStorage.setItem(localStorageCurrentAuxKey, String(num));
 }
 
-loadConfigPromise.then(() => {
+// const config = await getConfig();
+// console.log(config);
+
+let config: any
+getConfig().then(res => {
+  config = res;
+  levels.value = new Array(config.maxAux+1);
+  pans.value = new Array(config.maxAux+1);
+  for (let i = 0; i <= config.maxAux; i++) {
+    levels.value[i] = new Array<number>(config.maxChannel+1).fill(0);
+    pans.value[i] = new Array<number>(config.maxChannel+1).fill(0);
+  }
+
+
   fetch('http://' + config.host + "/channels").then(res => res.json()).then(res => {
     channels.value = res.channels;
+    console.log(res);
     createWs();
   });
 
   fetch('http://' + config.host + "/auxes").then(res => res.json()).then(res => {
     auxes.value = res.auxes;
   });
-});
+})
 
 let ws: WebSocket;
 
