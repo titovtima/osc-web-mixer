@@ -1,8 +1,8 @@
 <template>
   <div class="channel-strip">
     <div class="channel-header">
-      <div class="channel-number">{{ number }}</div>
-      <div class="channel-name">{{ name }}</div>
+      <div class="channel-number">{{ data.number }}</div>
+      <div class="channel-name">{{ data.name }}</div>
       <button @click="panShow = !panShow" class="pan-show-btn" style="float: right;">
         {{ (panShow) ? 'pan' : 'lvl' }}
       </button>
@@ -100,18 +100,11 @@
 </template>
 
 <script setup lang="ts">
-let props = defineProps({
-  name: String,
-  number: Number,
-  level: {
-    type: Number,
-    required: true,
-  },
-  pan: {
-    type: Number,
-    required: true,
-  },
-});
+let props = defineProps<{
+  data: channel,
+  level: number,
+  pan: number,
+}>();
 
 let emit = defineEmits(['update:level', 'update:pan']);
 

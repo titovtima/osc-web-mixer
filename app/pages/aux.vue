@@ -23,16 +23,20 @@
     </div>
 
     <div class="channels-container">
-      <ChannelShow 
+      <ChannelGroupShow 
+        v-for="group in channels" 
+        :group="group"
+        :levels="levels[currentAuxNum]" 
+        @update:level="(value, channelNum) => sendLevelToServer(channelNum, value)"
+        :pans="pans[currentAuxNum]" 
+        @update:pan="(value, channelNum) => sendPanToServer(channelNum, value)"
+      />
+      <!-- <ChannelShow 
         v-for="channel in channels" 
         :key="channel.number"
         :name="channel.name" 
         :number="channel.number"
-        :level="levels[currentAuxNum][channel.number]" 
-        @update:level="(value) => sendLevelToServer(channel.number, currentAuxNum, value)"
-        :pan="pans[currentAuxNum][channel.number]" 
-        @update:pan="(value) => sendPanToServer(channel.number, currentAuxNum, value)"
-      />
+      /> -->
     </div>
 
     <div class="mixer-footer">
@@ -47,11 +51,13 @@
 </template>
 
 <script setup lang="ts">
+import ChannelGroupShow from '~/components/ChannelGroupShow.vue';
+
 const selectAuxElem: Ref<any> = ref(null);
 const currentAuxNum = ref(0);
 const wsConnected = ref(false);
 
-const channels: Ref<Array<any>> = ref([]);
+const channels: Ref<channelGroup[]> = ref([]);
 const auxes: Ref<Array<any>> = ref([{number: 0, name: "aux 0", color: "ffffff"}]);
 
 // console.log(config);
@@ -129,7 +135,8 @@ function createWs() {
   }
 }
 
-function sendLevelToServer(channel: number, aux: number, value: number) {
+function sendLevelToServer(channel: number, value: number) {
+  let aux = currentAuxNum.value;
   if (ws && ws.readyState === WebSocket.OPEN) {
     if (config.consoleType == 's') {
       ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/level', args: [value]}))
@@ -142,7 +149,8 @@ function sendLevelToServer(channel: number, aux: number, value: number) {
   }
 }
 
-function sendPanToServer(channel: number, aux: number, value: number) {
+function sendPanToServer(channel: number, value: number) {
+  let aux = currentAuxNum.value;
   if (ws && ws.readyState === WebSocket.OPEN) {
     if (config.consoleType == 's') {
       ws.send(JSON.stringify({address: '/channel/' + channel + '/send/' + aux + '/pan', args: [value]}))
