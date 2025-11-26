@@ -24,6 +24,7 @@
 
     <div class="channels-container">
       <ChannelGroupShow 
+        style="margin-top: 0.5rem;"
         v-for="group in channels" 
         :group="group"
         :levels="levels[currentAuxNum]" 
@@ -231,9 +232,9 @@ onMounted(() => {
 }
 
 .channels-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* gap: 0.5rem; */
   margin-bottom: 1rem;
   flex: 1; /* Take available space */
   overflow-y: auto; /* Enable scrolling only for channels */
