@@ -11,6 +11,7 @@
     <div v-if="isExpanded">
       <ChannelShow 
         v-for="channel in group.channels"
+        :style="{ display: channel.hidden ? 'none' : 'block' }"
         :data="channel" 
         :level="levels[channel.number]"
         :pan="pans[channel.number]"

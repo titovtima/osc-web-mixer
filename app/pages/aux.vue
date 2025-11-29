@@ -26,6 +26,7 @@
       <ChannelGroupShow 
         style="margin-top: 0.5rem;"
         v-for="group in channels" 
+        :style="{ display: group.hidden ? 'none' : 'block' }"
         :group="group"
         :levels="levels[currentAuxNum]" 
         @update:level="(value: number, channelNum: number) => sendLevelToServer(channelNum, value)"
