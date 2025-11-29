@@ -16,9 +16,17 @@
     <div class="controls-row">
       <!-- Level Control -->
       <div v-if="!panShow" class="control-group">
-        <div class="level-control-compact">
+        <div style="display: flex; flex-direction: row; gap: 0.5rem; align-items: center;">
+          <button 
+            class="control-button-small"
+            style="flex: 0 1 2rem;"
+            @click="decreaseLevel"
+          >
+            −
+          </button>
           <div 
             class="level-track-container"
+            style="display: inline-block; flex: 1 1 3rem"
             ref="barContainer"
           >
             <div 
@@ -39,28 +47,31 @@
               <div class="level-value">{{ formatLevelValue(levelRef) }}</div>
             </div>
           </div>
-          <div class="level-buttons">
-            <button 
-              class="control-button-small"
-              @click="decreaseLevel"
-            >
-              −
-            </button>
-            <button 
-              class="control-button-small"
-              @click="increaseLevel"
-            >
-              +
-            </button>
-          </div>
+          <button 
+            class="control-button-small"
+            style="flex: 0 1 2rem;"
+            @click="increaseLevel"
+          >
+            +
+          </button>
+          <!-- <div class="level-buttons">
+          </div> -->
         </div>
       </div>
 
       <!-- Pan Control -->
       <div v-else class="control-group">
-        <div class="pan-control-compact">
+        <div style="display: flex; flex-direction: row; gap: 0.5rem;">
+          <button 
+            class="control-button-small"
+            style="flex: 0 1 2rem;"
+            @click="decreasePan"
+          >
+            L
+          </button>
           <div 
             class="pan-track-container"
+            style="flex: 1 1 3rem;"
             ref="panContainer"
           >
             <div 
@@ -78,26 +89,20 @@
               <div class="pan-value">{{ formatPanValue(panRef) }}</div>
             </div>
           </div>
-          <div class="pan-buttons">
-            <button 
-              class="control-button-small"
-              @click="decreasePan"
-            >
-              L
-            </button>
-            <button 
-              class="control-button-small"
-              @click="centerPan"
-            >
-              C
-            </button>
-            <button 
-              class="control-button-small"
-              @click="increasePan"
-            >
-              R
-            </button>
-          </div>
+          <button 
+            class="control-button-small"
+            style="flex: 0 1 2rem;"
+            @click="centerPan"
+          >
+            C
+          </button>
+          <button 
+            class="control-button-small"
+            style="flex: 0 1 2rem;"
+            @click="increasePan"
+          >
+            R
+          </button>
         </div>
       </div>
     </div>
@@ -325,7 +330,6 @@ onDeactivated(() => {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
-  min-height: 100px;
   touch-action: pan-y; /* Improve touch scrolling */
   position: relative;
   z-index: 1; /* Base z-index for the channel */
@@ -390,12 +394,6 @@ onDeactivated(() => {
 }
 
 /* Level Control Styles */
-.level-control-compact {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .level-track-container {
   position: relative;
   height: 30px;
@@ -454,19 +452,7 @@ onDeactivated(() => {
   user-select: none;
 }
 
-.level-buttons {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-}
-
 /* Pan Control Styles */
-.pan-control-compact {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .pan-track-container {
   position: relative;
   height: 30px;
@@ -525,12 +511,6 @@ onDeactivated(() => {
   user-select: none;
 }
 
-.pan-buttons {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-}
-
 .control-button-small {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -540,14 +520,14 @@ onDeactivated(() => {
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 30px;
-  height: 24px;
+  /* min-width: 30px; */
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
   touch-action: manipulation;
-  flex: 1;
+  /* flex: 1; */
 }
 
 /* Remove hover effects on touch devices */
@@ -574,7 +554,6 @@ onDeactivated(() => {
 @media (max-width: 768px) {
   .channel-strip {
     padding: 0.5rem;
-    min-height: 90px;
   }
   
   .controls-row {
@@ -598,22 +577,21 @@ onDeactivated(() => {
   
   .level-track-container,
   .pan-track-container {
-    height: 25px;
+    height: 30px;
   }
   
   .level-handle-horizontal {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
   }
   
   .pan-handle-horizontal {
-    width: 18px;
-    height: 18px;
+    width: 25px;
+    height: 25px;
   }
   
   .control-button-small {
-    min-width: 25px;
-    height: 20px;
+    height: 100%;
     font-size: 0.65rem;
     padding: 0.2rem 0.4rem;
   }
