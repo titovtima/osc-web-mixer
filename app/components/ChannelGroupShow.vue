@@ -35,5 +35,5 @@ watch(() => props.group, () => {
 
 const emit = defineEmits(['update:level', 'update:pan']);
 
-const isExpanded = ref(true);
+const isExpanded = ref(false);
 </script>
