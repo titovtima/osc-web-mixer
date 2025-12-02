@@ -1,40 +1,43 @@
 <template>
   <div class="mixer-container">
-    <div class="mixer-header">
-      <h1 class="mixer-title">DiGiCo AUX Mixer</h1>
-      <div class="aux-selector-container">
-        <label class="aux-selector-label">AUX Bus:</label>
-        <select 
-          ref="selectAuxElem" 
-          @change="changeAux(selectAuxElem.value)"
-          class="aux-selector"
-        >
-          <option 
-            v-for="aux in auxes" 
-            :value="aux.number" 
-            :key="aux.number"
-            :style="{ color: '#' + aux.color, display: aux.hidden ? 'none' : 'block' }"
-            :selected="currentAuxNum == aux.number"
+    <div style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
+      <div class="mixer-header">
+        <h1 class="mixer-title">DiGiCo AUX Mixer</h1>
+        <div class="aux-selector-container">
+          <label class="aux-selector-label">AUX Bus:</label>
+          <select 
+            ref="selectAuxElem" 
+            @change="changeAux(selectAuxElem.value)"
+            class="aux-selector"
           >
-            {{ aux.name }}
-          </option>
-        </select>
+            <option 
+              v-for="aux in auxes" 
+              :value="aux.number" 
+              :key="aux.number"
+              :style="{ color: '#' + aux.color, display: aux.hidden ? 'none' : 'block' }"
+              :selected="currentAuxNum == aux.number"
+            >
+              {{ aux.name }}
+            </option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="channels-container">
-      <ChannelGroupShow 
-        style="margin-top: 0.5rem;"
-        v-for="group in channels" 
-        :style="{ display: group.hidden ? 'none' : 'block' }"
-        :group="group"
-        :levels="levels[currentAuxNum]" 
-        @update:level="(value: number, channelNum: number) => sendLevelToServer(channelNum, value)"
-        :pans="pans[currentAuxNum]" 
-        @update:pan="(value: number, channelNum: number) => sendPanToServer(channelNum, value)"
-      />
-    </div>
+      <div class="channels-container">
+        <ChannelGroupShow 
+          style="margin-top: 0.5rem;"
+          v-for="group in channels" 
+          :style="{ display: group.hidden ? 'none' : 'block' }"
+          :group="group"
+          :levels="levels[currentAuxNum]" 
+          @update:level="(value: number, channelNum: number) => sendLevelToServer(channelNum, value)"
+          :pans="pans[currentAuxNum]" 
+          @update:pan="(value: number, channelNum: number) => sendPanToServer(channelNum, value)"
+        />
+      </div>
 
+    </div>
+    
     <div class="mixer-footer">
       <div class="status-indicator" :class="{ connected: wsConnected }">
         {{ wsConnected ? 'Connected' : 'Disconnected' }}
@@ -244,9 +247,8 @@ function sendPanToServer(channel: number, value: number) {
   /* flex-direction: column; */
   /* gap: 0.5rem; */
   margin-bottom: 1rem;
+  overflow: hidden;
   flex: 1; /* Take available space */
-  overflow-y: auto; /* Enable scrolling only for channels */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
