@@ -2,7 +2,14 @@
   <div class="mixer-container">
     <div style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
       <div class="mixer-header">
-        <h1 class="mixer-title">DiGiCo AUX Mixer</h1>
+        <div>
+          <h1 class="mixer-title">Istok AUX Mixer</h1>
+          <div>
+            Scale: 
+            <button class="scale-button" @click="scaleMinus">-</button>
+            <button class="scale-button" @click="scalePlus">+</button>
+          </div>
+        </div>
         <div class="aux-selector-container">
           <label class="aux-selector-label">AUX Bus:</label>
           <select 
@@ -64,6 +71,7 @@ const auxes: Ref<aux[]> = ref([{number: 0, order: 1, name: "aux 0", hidden: fals
 const levels: Ref<any> = ref([]);
 const pans: Ref<any> = ref([]);
 const localStorageCurrentAuxKey = 'currentAux';
+const localStorageCurrentScaleKey = 'scale';
 function changeAux(num: number) {
   let nexAux: aux | null = null;
   for (let a of auxes.value) {
@@ -183,6 +191,26 @@ function sendPanToServer(channel: number, value: number) {
     pans.value[aux][channel] = value;
   }
 }
+
+function scalePlus() {
+  let html = document.documentElement;
+  let scale = Math.min(parseInt(getComputedStyle(html, '').fontSize) + 1, 30) + 'px';
+  html.style.fontSize = scale;
+  localStorage.setItem(localStorageCurrentScaleKey, scale);
+}
+
+function scaleMinus() {
+  let html = document.documentElement;
+  let scale = Math.max(parseInt(getComputedStyle(html, '').fontSize) - 1, 8) + 'px';
+  html.style.fontSize = scale;
+  localStorage.setItem(localStorageCurrentScaleKey, scale);
+}
+
+onMounted(() => {
+  let scale = localStorage.getItem(localStorageCurrentScaleKey);
+  if (scale)
+    document.documentElement.style.fontSize = scale;
+})
 </script>
 
 <style scoped>
@@ -206,7 +234,7 @@ function sendPanToServer(channel: number, value: number) {
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0; /* Prevent header from shrinking */
@@ -220,6 +248,22 @@ function sendPanToServer(channel: number, value: number) {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.scale-button {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.25rem;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 100%;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: manipulation;
 }
 
 .aux-selector-container {
@@ -236,7 +280,7 @@ function sendPanToServer(channel: number, value: number) {
 .aux-selector {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  border-radius: 0.5rem;
   padding: 0.5rem;
   color: white;
   font-size: 0.9rem;
@@ -265,7 +309,7 @@ function sendPanToServer(channel: number, value: number) {
   align-items: center;
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0; /* Prevent footer from shrinking */
@@ -274,7 +318,7 @@ function sendPanToServer(channel: number, value: number) {
 
 .status-indicator {
   padding: 0.25rem 0.75rem;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   font-size: 0.8rem;
   background: #e74c3c;
 }

@@ -327,9 +327,9 @@ onDeactivated(() => {
 <style scoped>
 .channel-strip {
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   padding: 0.75rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(0.6rem);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   touch-action: pan-y; /* Improve touch scrolling */
@@ -403,7 +403,7 @@ onDeactivated(() => {
 /* Level Control Styles */
 .level-track-container {
   position: relative;
-  height: 30px;
+  height: 2rem;
   touch-action: none; /* Prevent scrolling when dragging */
 }
 
@@ -414,7 +414,7 @@ onDeactivated(() => {
   right: 0;
   height: 100%;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 0.5rem;
   cursor: pointer;
   overflow: hidden;
 }
@@ -431,8 +431,8 @@ onDeactivated(() => {
 .level-handle-horizontal {
   position: absolute;
   top: 50%;
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   background: white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -462,7 +462,7 @@ onDeactivated(() => {
 /* Pan Control Styles */
 .pan-track-container {
   position: relative;
-  height: 30px;
+  height: 2rem;
   touch-action: none;
 }
 
@@ -473,7 +473,7 @@ onDeactivated(() => {
   right: 0;
   height: 100%;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 0.5rem;
   cursor: pointer;
 }
 
@@ -490,8 +490,8 @@ onDeactivated(() => {
 .pan-handle-horizontal {
   position: absolute;
   top: 50%;
-  width: 20px;
-  height: 20px;
+  width: 1.5rem;
+  height: 1.5rem;
   background: #00b4db;
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -521,7 +521,7 @@ onDeactivated(() => {
 .control-button-small {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  border-radius: 0.25rem;
   color: white;
   padding: 0.25rem 0.5rem;
   font-size: 0.7rem;
@@ -574,27 +574,12 @@ onDeactivated(() => {
   
   .channel-number {
     font-size: 0.7rem;
-    min-width: 25px;
+    min-width: 1.5rem;
     padding: 0.2rem 0.4rem;
   }
   
   .channel-name {
     font-size: 0.8rem;
-  }
-  
-  .level-track-container,
-  .pan-track-container {
-    height: 30px;
-  }
-  
-  .level-handle-horizontal {
-    width: 25px;
-    height: 25px;
-  }
-  
-  .pan-handle-horizontal {
-    width: 25px;
-    height: 25px;
   }
   
   .control-button-small {
