@@ -15,7 +15,7 @@
     
     <div class="controls-row">
       <!-- Level Control -->
-      <div v-if="!panShow" class="control-group">
+      <div v-if="!panShow || !currentAux.stereo" class="control-group">
         <div style="display: flex; flex-direction: row; gap: 0.5rem; align-items: center;">
           <button 
             class="control-button-small"
