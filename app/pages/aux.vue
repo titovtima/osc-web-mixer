@@ -1,9 +1,9 @@
 <template>
   <div class="mixer-container">
-    <div style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
-      <div class="mixer-header">
+    <div class="mixer-header">
+      <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+        <h1 class="mixer-title">Istok AUX Mixer</h1>
         <div>
-          <h1 class="mixer-title">Istok AUX Mixer</h1>
           <div>
             Scale: 
             <button class="scale-button" @click="scaleMinus">-</button>
@@ -14,57 +14,35 @@
             <button class="scale-button" @click="() => allChannelsPlus(-5)">-5</button>
             <button class="scale-button" @click="() => allChannelsPlus(5)">+5</button>
           </div>
-        </div>
-        <div class="aux-selector-container">
-          <label class="aux-selector-label">AUX Bus:</label>
-          <select 
-            ref="selectAuxElem" 
-            @change="changeAux(selectAuxElem.value)"
-            class="aux-selector"
-          >
-            <option 
-              v-for="aux in auxes" 
-              :value="aux.number" 
-              :key="aux.number"
-              :style="{ color: '#' + aux.color, display: aux.hidden ? 'none' : 'block' }"
-              :selected="currentAuxNum == aux.number"
-            >
-              {{ aux.name }}
-            </option>
-          </select>
+          <div class="status-indicator" :class="{ connected: wsConnected }">
+            {{ wsConnected ? 'Connected' : 'Disconnected' }}
+          </div>
         </div>
       </div>
 
-      <div class="channels-container">
-        <ChannelGroupShow 
-          style="margin-top: 0.5rem;"
-          v-for="group in channels" 
-          :style="{ display: group.hidden ? 'none' : 'block' }"
-          :group="group"
-          :levels="levels[currentAuxNum]" 
-          @update:level="(value: number, channelNum: number) => sendLevelToServer(channelNum, value)"
-          :pans="pans[currentAuxNum]" 
-          @update:pan="(value: number, channelNum: number) => sendPanToServer(channelNum, value)"
-        />
-      </div>
-
+      <span style="padding: 0.25rem;">Aux:</span>
+      <SelectChannel scroll :list="auxes.map(aux => aux.name)" :selected="currentAux.name" @select="aux => changeAuxByName(aux)"/>
+      <span style="padding: 0.25rem;">Groups:</span>
+      <SelectChannel :list="channels.filter(group => !group.hidden).map(group => group.name)"
+        :selected="currentGroup ? currentGroup.name : null"
+        @select="group => selectGroupByName(group)"/>
     </div>
-    
-    <div class="mixer-footer">
-      <div class="status-indicator" :class="{ connected: wsConnected }">
-        {{ wsConnected ? 'Connected' : 'Disconnected' }}
-      </div>
-      <div class="current-aux-display">
-        {{ auxes.find((a: any) => a.number === currentAuxNum)?.name || 'None' }}
-      </div>
+
+    <div style="overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 3rem;">
+      <ChannelGroupShow 
+        v-if="currentGroup"
+        :group="currentGroup"
+        :levels="levels[currentAuxNum]" 
+        @update:level="(value: number, channelNum: number) => sendLevelToServer(channelNum, value)"
+        :pans="pans[currentAuxNum]" 
+        @update:pan="(value: number, channelNum: number) => sendPanToServer(channelNum, value)"
+        />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import ChannelGroupShow from '~/components/ChannelGroupShow.vue';
-
-const selectAuxElem: Ref<any> = ref(null);
+// const selectAuxElem: Ref<any> = ref(null);
 const currentAux: Ref<aux> = useState('currentAux', () => { 
   return {number: 0, order: 1, name: "aux 0", hidden: false, stereo: true, color: "ffffff"}});
 const currentAuxNum = computed(() => currentAux.value.number);
@@ -90,6 +68,20 @@ function changeAux(num: number) {
     currentAux.value = nexAux;
     localStorage.setItem(localStorageCurrentAuxKey, String(num));
   }
+}
+
+function changeAuxByName(name: string) {
+  let f = auxes.value.filter(aux => aux.name == name);
+  if (f.length > 0 && f[0])
+    changeAux(f[0].number);
+}
+
+const currentGroup: Ref<channelGroup | null> = ref(null);
+
+function selectGroupByName(name: string) {
+  let f = channels.value.filter(group => group.name == name);
+  if (f.length > 0 && f[0])
+    currentGroup.value = f[0];
 }
 
 let config: any
@@ -245,9 +237,9 @@ onMounted(() => {
 }
 
 .mixer-header {
-  display: flex;
+  /* display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; */
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.05);
@@ -334,6 +326,7 @@ onMounted(() => {
 }
 
 .status-indicator {
+  display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 0.75rem;
   font-size: 0.8rem;
