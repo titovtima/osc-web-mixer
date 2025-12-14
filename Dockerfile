@@ -8,6 +8,8 @@ RUN corepack enable
 # Copy the entire project
 COPY . .
 
+RUN rm -rf .nuxt .output node_modules package-lock.json
+
 # Install dependencies
 RUN pnpm i
 
